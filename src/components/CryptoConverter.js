@@ -82,6 +82,7 @@ const CryptoConverter = () => {
           <ReactSelect
             className="w-full md:w-64" // Adjust the width as needed
             required
+            placeholder="Crypto List"
             options={currencies?.map((currency) => ({
               value: currency.id,
               label: (
@@ -111,15 +112,28 @@ const CryptoConverter = () => {
               setConvertedAmount(null);
             }}
           />
+<ReactSelect
+            className="w-full md:w-64" // Adjust the width as needed
+            required
+            placeholder="currency"
+            options={currencyList?.map((currency) => ({
+              value: currency,
+              label: currency,
+            }))}
+            onChange={(selectedOption) =>{
 
-          <select
+              setTargetCurrency(selectedOption.value)
+              setConvertedAmount(null);
+            }
+            }
+          />
+          {/* <select
             className="p-2 border rounded"
             value={targetCurrency}
             required
             placeholder="currency"
             onChange={(e) => {
               setTargetCurrency(e.target.value);
-              setConvertedAmount(null);
             }}
           >
             <option value="" disabled>
@@ -130,7 +144,7 @@ const CryptoConverter = () => {
                 {item}
               </option>
             ))}
-          </select>
+          </select> */}
 
           <button
             type="submit"
