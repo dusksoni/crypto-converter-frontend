@@ -15,21 +15,15 @@ const CryptoConverter = () => {
   const [convertedAmount, setConvertedAmount] = useState(null);
   const [error, setError] = useState("");
   const [loader, setLoader] = useState(false);
-  //   const apiPath = "http://localhost:5000"
   const apiPath = "https://crypto-converter-backend.vercel.app";
 
   useEffect(() => {
     axios
       .get(`${apiPath}/api/currency-list`)
       .then((response) => {
-        setCurrencyList(response?.data?.filter((item) => item !== "inr"));
-        //   setSourceCurrency(response.data[0] || '');
+        setCurrencyList(response.data.filter((item) => item !== "inr"));
       })
-      .catch(error => 
-
-      console.log(error)
-        // notifyFailure(error.message)
-        );
+      .catch((error) => notifyFailure(error));
     // Fetch the list of cryptocurrencies
     axios
       .get(`${apiPath}/api/currencies`)
@@ -37,8 +31,7 @@ const CryptoConverter = () => {
         setCurrencies(response.data);
         setSourceCurrency(response.data[0]?.id || "");
       })
-      .catch(error => 
-      console.log(error));
+      .catch((error) => notifyFailure(error));
   }, []);
 
   const handleConvert = () => {
@@ -57,107 +50,102 @@ const CryptoConverter = () => {
         },
       })
       .then((response) => {
-        setConvertedAmount(response?.data?.convertedAmount);
+        setConvertedAmount(response.data.convertedAmount);
         setLoader(false);
       })
-      .catch(error => {
-        notifyFailure(error.response.data.error);
+      .catch((error) => {
+        notifyFailure(error);
         setLoader(false);
       });
   };
 
-  const notify = (value) => {
-    toast.success(value);
-    // simulate authentication success
-  };
   const notifyFailure = (value) => {
     toast.error(value);
-    // simulate authentication failure
   };
-  console.log(sourceCurrency);
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header */}
       <header className="bg-blue-500 text-white p-4">
-        <h1 className="text-3xl font-semibold">Crypto Currency Converter</h1>
+        <h1 className="text-3xl font-semibold text-center">Crypto Currency Converter</h1>
       </header>
 
       {/* Main Content */}
       <main className="flex-grow container mx-auto mt-8 p-4">
-        {loader && 
+        {loader && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
+            <Loader />
+          </div>
+        )}
 
-         <Loader />
-       
-         }
-         <div className={`${loader ? 'blur' : ''}`}>
-
-        <div className="flex space-x-2 justify-center">
+        <div className={`flex flex-col md:justify-center space-y-4 md:flex-row md:space-x-4 md:space-y-0 ${loader ? 'blur' : ''}`}>
           <ReactSelect
-            className="w-64 h-[38px]" // Adjust the width as needed
+            className="w-full md:w-64" // Adjust the width as needed
             required
             options={currencies?.map((currency) => ({
-                value: currency?.id,
-                label: (
-                    <div className="flex items-center">
+              value: currency.id,
+              label: (
+                <div className="flex items-center">
                   <img
-                    src={currency?.image}
-                    alt={currency?.name}
+                    src={currency.image}
+                    alt={currency.name}
                     className="w-6 h-6 mr-2"
-                    />
-                  {currency?.name} ({currency?.price} INR)
+                  />
+                  {currency.name} ({currency.price} INR)
                 </div>
               ),
             }))}
-            // value={currencies.find(currency => currency.id === sourceCurrency)}
             onChange={(selectedOption) =>
-                setSourceCurrency(selectedOption.value)
+              setSourceCurrency(selectedOption.value)
             }
-            />
+          />
 
           <input
             type="number"
-            className="p-2 border rounded h-[38px]"
+            className="p-2 border rounded"
             placeholder="Enter amount"
             value={amount}
             required
             onChange={(e) => {
-                setAmount(e.target.value);
-                setConvertedAmount(null);
+              setAmount(e.target.value);
+              setConvertedAmount(null);
             }}
-            />
+          />
 
           <select
-            className="p-2 border rounded h-[38px]"
+            className="p-2 border rounded"
             value={targetCurrency}
             required
             placeholder="currency"
             onChange={(e) => {
-                setTargetCurrency(e.target.value);
-                setConvertedAmount(null);
+              setTargetCurrency(e.target.value);
+              setConvertedAmount(null);
             }}
-            >
-            <option value="" selected disabled>
+          >
+            <option value="" disabled>
               Currency
             </option>
             {currencyList?.map((item) => (
-                <option value={item} className="uppercase">
+              <option key={item} value={item} className="uppercase">
                 {item}
               </option>
             ))}
           </select>
-              </div>
-        <button
-          type="submit"
-          className="bg-blue-500 text-white p-2 rounded h-[38px] mt-10"
-          onClick={handleConvert}
+
+          <button
+            type="submit"
+            className="bg-blue-500 text-white p-2 rounded w-full md:w-auto"
+            onClick={handleConvert}
           >
-          Convert
-        </button>
+            Convert
+          </button>
         </div>
+
         {error && <div className="text-red-500 mt-2">{error}</div>}
+
         {convertedAmount !== null && (
-          <div className="mt-10 font-bold">
-            <p className=" mb-10">Converted Amount:</p>
+          <div className="mt-10 font-bold text-center">
+            <p className="mb-2">Converted Amount:</p>
             <span className="bg-gray-500 text-white px-4 py-3 rounded-md">
               {amount} x {sourceCurrency.toLowerCase()} ={" "}
               {convertedAmount.toFixed(2)} {targetCurrency.toUpperCase()}
